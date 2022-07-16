@@ -8,9 +8,19 @@
  * @format
  */
 
-import React, {useRef} from 'react';
-import {SafeAreaView, Dimensions, StatusBar, StyleSheet} from 'react-native';
-import {WebView} from 'react-native-webview';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  SafeAreaView,
+  Dimensions,
+  StatusBar,
+  StyleSheet,
+  BackHandler,
+} from 'react-native';
+import {
+  WebView,
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from 'react-native-webview';
 
 const screen = Dimensions.get('screen');
 
@@ -19,8 +29,68 @@ const screen = Dimensions.get('screen');
  * dev인 경우 localhost, production인 경우 호스팅된 url로 변경 */
 const BASE_WEBVIEW_URL = 'http://192.168.0.4:3000/';
 
+const MESSAGES = {
+  NAVIGATION_STATE_CHANGE: 'navigationStateChange',
+};
+
 const App = () => {
   const webViewRef = useRef<WebView>(null);
+  const [navState, setNavState] = useState<WebViewNavigation>();
+
+  useEffect(() => {
+    const backAction = (): boolean => {
+      if (navState?.canGoBack) {
+        webViewRef.current?.goBack();
+        // 시스템 기본 뒤로가기 미동작
+        return true;
+      }
+
+      // 시스템 기본 뒤로가기 동작 실행
+      return false;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
+    };
+  }, [navState?.canGoBack]);
+
+  /**
+   * history api인 경우 : postMessage('navigationStateChange')
+   * pushState(), replaceState()도 놓치지 않고 안드로이드 백버튼으로 제어 가능 */
+  const HANDLE_HISTORY_API_INJECTED_CODE = `
+     (function() {
+       function wrap(fn) {
+         return function wrapper() {
+           var res = fn.apply(this, arguments);
+           window.ReactNativeWebView.postMessage('${MESSAGES.NAVIGATION_STATE_CHANGE}');
+           return res;
+         }
+       }
+   
+       history.pushState = wrap(history.pushState);
+       history.replaceState = wrap(history.replaceState);
+       window.addEventListener('popstate', function() {
+         window.ReactNativeWebView.postMessage('${MESSAGES.NAVIGATION_STATE_CHANGE}');
+       });
+     })();
+   
+     true;
+   `;
+
+  const handleLoadStart = () => {
+    webViewRef.current?.injectJavaScript(HANDLE_HISTORY_API_INJECTED_CODE);
+  };
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    const {nativeEvent} = event;
+
+    /** history api로 변경되는 stack 반영 */
+    if (nativeEvent.data === MESSAGES.NAVIGATION_STATE_CHANGE) {
+      setNavState(nativeEvent as unknown as WebViewNavigation);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,6 +99,9 @@ const App = () => {
         ref={webViewRef}
         source={{uri: BASE_WEBVIEW_URL}}
         style={styles.webview}
+        onLoadStart={handleLoadStart}
+        onNavigationStateChange={setNavState}
+        onMessage={handleMessage}
       />
     </SafeAreaView>
   );
@@ -37,7 +110,6 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   webview: {
     height: screen.height,
