@@ -36,11 +36,6 @@ const App = () => {
 
   useEffect(() => {
     const backAction = (): boolean => {
-      if (!webViewRef.current) {
-        console.error('webViewRef.current is null');
-        return false;
-      }
-
       const bridge = new WebViewBridge(webViewRef.current);
 
       bridge.back();

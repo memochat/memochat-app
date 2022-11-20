@@ -13,7 +13,7 @@ class WebViewBridge {
   static instance: WebViewBridge;
   static webViewRef: WebView;
 
-  constructor(webViewRef?: WebView) {
+  constructor(webViewRef?: WebView | null) {
     if (!WebViewBridge.instance) {
       if (!webViewRef) {
         throw new Error('WebView ref is not set');
