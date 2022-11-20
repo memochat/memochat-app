@@ -20,9 +20,9 @@ import Toast from 'react-native-toast-message';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
 
 import WebViewBridge from './modules/WebViewBridge';
-import WebViewMsgReceiver, {
+import WebViewMessageReceiver, {
   MemochatWebViewMessage,
-} from './modules/WebViewMsgReceiver';
+} from './modules/WebViewMessageReceiver';
 
 const screen = Dimensions.get('screen');
 
@@ -56,17 +56,17 @@ const App = () => {
 
   const handleMessage = (event: WebViewMessageEvent) => {
     const {nativeEvent} = event;
-    const msg = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
+    const message = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
 
-    const webViewMsgReceiver = new WebViewMsgReceiver();
+    const webViewMessageReceiver = new WebViewMessageReceiver();
 
-    switch (msg.action) {
+    switch (message.action) {
       case 'test': {
-        webViewMsgReceiver.test(msg);
+        webViewMessageReceiver.test(message);
         return;
       }
       default: {
-        console.log(msg);
+        console.log(message);
       }
     }
   };
