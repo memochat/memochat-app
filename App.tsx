@@ -15,6 +15,7 @@ import {
   StatusBar,
   StyleSheet,
   BackHandler,
+  Platform,
 } from 'react-native';
 import {
   WebView,
@@ -27,7 +28,9 @@ const screen = Dimensions.get('screen');
 /**
  * @todo .env 파일 추가
  * dev인 경우 localhost, production인 경우 호스팅된 url로 변경 */
-const BASE_WEBVIEW_URL = 'http://localhost:3000/home';
+const BASE_WEBVIEW_URL = `http://${
+  Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
+}:3000`;
 
 const MESSAGES = {
   NAVIGATION_STATE_CHANGE: 'navigationStateChange',
