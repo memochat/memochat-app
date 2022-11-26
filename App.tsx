@@ -8,20 +8,23 @@
  * @format
  */
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
-  SafeAreaView,
+  BackHandler,
   Dimensions,
+  SafeAreaView,
   StatusBar,
   StyleSheet,
   BackHandler,
   Platform,
 } from 'react-native';
-import {
-  WebView,
-  WebViewMessageEvent,
-  WebViewNavigation,
-} from 'react-native-webview';
+import Toast from 'react-native-toast-message';
+import {WebView, WebViewMessageEvent} from 'react-native-webview';
+
+import WebViewBridge from './modules/WebViewBridge';
+import WebViewMessageReceiver, {
+  MemochatWebViewMessage,
+} from './modules/WebViewMessageReceiver';
 
 const screen = Dimensions.get('screen');
 
@@ -32,24 +35,15 @@ const BASE_WEBVIEW_URL = `http://${
   Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
 }:3000`;
 
-const MESSAGES = {
-  NAVIGATION_STATE_CHANGE: 'navigationStateChange',
-};
-
 const App = () => {
   const webViewRef = useRef<WebView>(null);
-  const [navState, setNavState] = useState<WebViewNavigation>();
 
   useEffect(() => {
     const backAction = (): boolean => {
-      if (navState?.canGoBack) {
-        webViewRef.current?.goBack();
-        // 시스템 기본 뒤로가기 미동작
-        return true;
-      }
+      const bridge = new WebViewBridge(webViewRef.current);
 
-      // 시스템 기본 뒤로가기 동작 실행
-      return false;
+      bridge.back();
+      return true;
     };
 
     BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -57,56 +51,38 @@ const App = () => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', backAction);
     };
-  }, [navState?.canGoBack]);
-
-  /**
-   * history api인 경우 : postMessage('navigationStateChange')
-   * pushState(), replaceState()도 놓치지 않고 안드로이드 백버튼으로 제어 가능 */
-  const HANDLE_HISTORY_API_INJECTED_CODE = `
-      (function() {
-        function wrap(fn) {
-          return function wrapper() {
-            var res = fn.apply(this, arguments);
-            window.ReactNativeWebView.postMessage('${MESSAGES.NAVIGATION_STATE_CHANGE}');
-            return res;
-          }
-        }
-    
-        history.pushState = wrap(history.pushState);
-        history.replaceState = wrap(history.replaceState);
-        window.addEventListener('popstate', function() {
-          window.ReactNativeWebView.postMessage('${MESSAGES.NAVIGATION_STATE_CHANGE}');
-        });
-      })();
-    
-      true;
-    `;
-
-  const handleLoadStart = () => {
-    webViewRef.current?.injectJavaScript(HANDLE_HISTORY_API_INJECTED_CODE);
-  };
+  }, []);
 
   const handleMessage = (event: WebViewMessageEvent) => {
     const {nativeEvent} = event;
+    const message = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
 
-    /** history api로 변경되는 stack 반영 */
-    if (nativeEvent.data === MESSAGES.NAVIGATION_STATE_CHANGE) {
-      setNavState(nativeEvent as unknown as WebViewNavigation);
+    const webViewMessageReceiver = new WebViewMessageReceiver();
+
+    switch (message.action) {
+      case 'test': {
+        webViewMessageReceiver.test(message);
+        return;
+      }
+      default: {
+        console.log(message);
+      }
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <WebView
-        ref={webViewRef}
-        source={{uri: BASE_WEBVIEW_URL}}
-        style={styles.webview}
-        onLoadStart={handleLoadStart}
-        onNavigationStateChange={setNavState}
-        onMessage={handleMessage}
-      />
-    </SafeAreaView>
+    <>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <WebView
+          ref={webViewRef}
+          source={{uri: BASE_WEBVIEW_URL}}
+          style={styles.webview}
+          onMessage={handleMessage}
+        />
+      </SafeAreaView>
+      <Toast />
+    </>
   );
 };
 
