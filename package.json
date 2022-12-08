@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "18.1.0",
     "react-native": "0.70.5",
+    "react-native-image-picker": "^4.10.2",
     "react-native-toast-message": "^2.1.5",
     "react-native-webview": "^11.23.1"
   },
