@@ -1,35 +1,42 @@
 import WebView from 'react-native-webview';
 
-export interface MemochatNativeMessage {
+/**
+ NOTE: Native Message 구조
+ {
+   action: string;
+   data?: Record<string, unknown>;
+   callbackId?: string;
+ }
+ */
+
+type BackNativeMessage = {
   action: 'back';
-  data?: Record<string, unknown>;
-  callbackId?: string;
-}
+};
+
+export type NativeMessage = BackNativeMessage;
 
 /**
  * webview로 메시지 보내는 브릿지
  */
 class WebViewBridge {
-  static instance: WebViewBridge;
-  static webViewRef: WebView;
+  private static webViewRef?: WebView;
 
-  constructor(webViewRef?: WebView | null) {
-    if (!WebViewBridge.instance) {
-      if (!webViewRef) {
-        throw new Error('WebView ref is not set');
-      }
-      WebViewBridge.webViewRef = webViewRef;
-      WebViewBridge.instance = this;
-      return WebViewBridge.instance;
-    }
-    return WebViewBridge.instance;
+  static setWebViewRef(ref: WebView) {
+    this.webViewRef = ref;
   }
 
-  back() {
-    const msg: MemochatNativeMessage = {
-      action: 'back',
-    };
-    WebViewBridge.webViewRef.postMessage(JSON.stringify(msg));
+  static postMessage(message: NativeMessage) {
+    if (!this.webViewRef) {
+      throw new Error(
+        'WebView ref is not set. Use setWebViewRef() method to set webView ref.',
+      );
+    }
+
+    this.webViewRef.postMessage(JSON.stringify(message));
+  }
+
+  static back() {
+    this.postMessage({action: 'back'});
   }
 }
 

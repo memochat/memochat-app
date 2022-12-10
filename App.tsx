@@ -22,7 +22,7 @@ import {WebView, WebViewMessageEvent} from 'react-native-webview';
 
 import WebViewBridge from './modules/WebViewBridge';
 import WebViewMessageReceiver, {
-  MemochatWebViewMessage,
+  WebViewMessage,
 } from './modules/WebViewMessageReceiver';
 
 const screen = Dimensions.get('screen');
@@ -38,35 +38,31 @@ const App = () => {
   const webViewRef = useRef<WebView>(null);
 
   useEffect(() => {
-    const backAction = (): boolean => {
-      const bridge = new WebViewBridge(webViewRef.current);
+    if (!webViewRef.current) {
+      return;
+    }
 
-      bridge.back();
+    WebViewBridge.setWebViewRef(webViewRef.current);
+
+    const handleHardwareBackPress = (): boolean => {
+      WebViewBridge.back();
       return true;
     };
 
-    BackHandler.addEventListener('hardwareBackPress', backAction);
+    BackHandler.addEventListener('hardwareBackPress', handleHardwareBackPress);
 
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backAction);
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleHardwareBackPress,
+      );
     };
   }, []);
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    const {nativeEvent} = event;
-    const message = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
+    const message = JSON.parse(event.nativeEvent.data) as WebViewMessage;
 
-    const webViewMessageReceiver = new WebViewMessageReceiver();
-
-    switch (message.action) {
-      case 'test': {
-        webViewMessageReceiver.test(message);
-        return;
-      }
-      default: {
-        console.log(message);
-      }
-    }
+    WebViewMessageReceiver.execute(message);
   };
 
   return (
