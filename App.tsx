@@ -20,7 +20,7 @@ import {
 import Toast from 'react-native-toast-message';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
 
-import WebViewBridge from './modules/WebViewBridge';
+import WebViewMessageSender from './modules/WebViewMessageSender';
 import WebViewMessageReceiver, {
   MemochatWebViewMessage,
 } from './modules/WebViewMessageReceiver';
@@ -34,12 +34,14 @@ const BASE_WEBVIEW_URL = `http://${
   Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
 }:3000`;
 
+// const BASE_WEBVIEW_URL = 'http://192.168.31.35:3000/test';
+
 const App = () => {
   const webViewRef = useRef<WebView>(null);
 
   useEffect(() => {
     const backAction = (): boolean => {
-      const bridge = new WebViewBridge(webViewRef.current);
+      const bridge = new WebViewMessageSender(webViewRef.current);
 
       bridge.back();
       return true;
@@ -57,10 +59,21 @@ const App = () => {
     const message = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
 
     const webViewMessageReceiver = new WebViewMessageReceiver();
+    const webViewMessageSender = new WebViewMessageSender(webViewRef.current);
 
     switch (message.action) {
       case 'test': {
         webViewMessageReceiver.test(message);
+        return;
+      }
+      case 'callback-test': {
+        webViewMessageReceiver.callbackTest(message);
+        setTimeout(() => {
+          webViewMessageSender.callbackTest({
+            action: message.action,
+            callbackId: message.callbackId,
+          });
+        }, 1000);
         return;
       }
       default: {
@@ -78,6 +91,7 @@ const App = () => {
           source={{uri: BASE_WEBVIEW_URL}}
           style={styles.webview}
           onMessage={handleMessage}
+          injectedJavaScript={'console.log(window.MemochatWebview)'}
         />
       </SafeAreaView>
       <Toast />
