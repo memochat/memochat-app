@@ -53,7 +53,7 @@ const App = () => {
     };
   }, []);
 
-  const handleMessage = (event: WebViewMessageEvent) => {
+  const handleMessage = async (event: WebViewMessageEvent) => {
     const {nativeEvent} = event;
     const message = JSON.parse(nativeEvent.data) as
       | WebToNativeMessage
@@ -70,10 +70,18 @@ const App = () => {
       case 'callback-test': {
         webViewMessageReceiver.callbackTest(message);
         setTimeout(() => {
-          webViewMessageSender.callbackTest({
+          webViewMessageSender.callbackTestCallback({
             callbackId: message.callbackId,
           });
         }, 1000);
+        return;
+      }
+      case 'upload-image': {
+        const formData = await webViewMessageReceiver.uploadImage(message);
+        webViewMessageSender.uploadImageCallback({
+          formData,
+          callbackId: message.callbackId,
+        });
         return;
       }
       default: {

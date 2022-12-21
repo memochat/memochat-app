@@ -45,11 +45,40 @@ class WebViewMessageSender {
     this.postNativeToWebMessage({action: 'back'});
   }
 
-  callbackTest({callbackId}: {callbackId: string}) {
+  callbackTestCallback({callbackId}: {callbackId: string}) {
     this.postNativeToWebCallbackMessage({
       action: 'callback-test',
       data: {
         message: 'hello',
+      },
+      callbackId,
+    });
+  }
+
+  uploadImageCallback({
+    formData,
+    callbackId,
+  }: {
+    formData: FormData | undefined;
+    callbackId: string;
+  }) {
+    console.log('formData: ', formData);
+    if (!formData) {
+      this.postNativeToWebCallbackMessage({
+        action: 'upload-image',
+        error: {
+          message: '이미지 호출 실패',
+        },
+        callbackId,
+      });
+      return;
+    }
+
+    // TODO: 이미지 업로드 api 호출
+    this.postNativeToWebCallbackMessage({
+      action: 'upload-image',
+      data: {
+        imageUrl: 'imageUrl',
       },
       callbackId,
     });
