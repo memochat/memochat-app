@@ -1,9 +1,5 @@
 import WebView from 'react-native-webview';
-import {
-  MemochatNativeToWebCallbackResponseMessage,
-  MemochatNativeToWebMessage,
-  MemochatWebToNativeMessage,
-} from './types';
+import {NativeToWebCallbackMessage, NativeToWebMessage} from './types';
 
 /**
  * webview로 메시지 보내는 브릿지
@@ -24,41 +20,39 @@ class WebViewMessageSender {
     return WebViewMessageSender.instance;
   }
 
-  private buildNativeToWebCallbackMessage(
-    params: MemochatNativeToWebCallbackResponseMessage,
-  ) {
-    const message = `window.MemochatWebview.postNativeToWebCallbackMessage(${JSON.stringify(
-      params,
-    )})`;
-    return message;
+  private postNativeToWebCallbackMessage(message: NativeToWebCallbackMessage) {
+    WebViewMessageSender.webViewRef.injectJavaScript(
+      `window.MemochatWebview.postNativeToWebCallbackMessage(${JSON.stringify(
+        message,
+      )})`,
+    );
   }
 
-  private buildNativeToWebMessage(params: MemochatNativeToWebMessage) {
+  private postNativeToWebMessage(message: NativeToWebMessage) {
     /*
       action: MemochatNativeToWebActions;
       data?: Record<string, unknown>;
       callbackId?: string;
     */
-    const message = `window.MemochatWebview.postNativeToWebMessage(${JSON.stringify(
-      params,
-    )})`;
-    return message;
+    WebViewMessageSender.webViewRef.injectJavaScript(
+      `window.MemochatWebview.postNativeToWebMessage(${JSON.stringify(
+        message,
+      )})`,
+    );
   }
 
   back() {
-    const message = this.buildNativeToWebMessage({action: 'back'});
-    WebViewMessageSender.webViewRef.injectJavaScript(message);
+    this.postNativeToWebMessage({action: 'back'});
   }
 
-  callbackTest(params: MemochatWebToNativeMessage) {
-    const message = this.buildNativeToWebCallbackMessage({
-      action: params.action,
+  callbackTest({callbackId}: {callbackId: string}) {
+    this.postNativeToWebCallbackMessage({
+      action: 'callback-test',
       data: {
         message: 'hello',
       },
-      callbackId: params.callbackId,
+      callbackId,
     });
-    WebViewMessageSender.webViewRef.injectJavaScript(message);
   }
 }
 

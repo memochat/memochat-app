@@ -1,10 +1,8 @@
 import Toast from 'react-native-toast-message';
-
-export interface MemochatWebViewMessage {
-  action: 'test' | 'callback-test'; //TODO: union으로 정의
-  args?: Record<string, unknown>;
-  callbackId?: string;
-}
+import {
+  TestWebToNativeMessage,
+  CallbackTestWebToNativeCallbackMessage,
+} from './types';
 
 class WebViewMessageReceiver {
   static instance: WebViewMessageReceiver;
@@ -17,7 +15,7 @@ class WebViewMessageReceiver {
     return WebViewMessageReceiver.instance;
   }
 
-  test(message: MemochatWebViewMessage) {
+  test(message: TestWebToNativeMessage) {
     Toast.show({
       type: 'info', //success, error, info
       text1: message.action,
@@ -26,7 +24,7 @@ class WebViewMessageReceiver {
     console.log(message);
   }
 
-  callbackTest(message: MemochatWebViewMessage) {
+  callbackTest(message: CallbackTestWebToNativeCallbackMessage) {
     Toast.show({
       type: 'info', //success, error, info
       text1: message.action,

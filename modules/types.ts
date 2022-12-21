@@ -1,27 +1,56 @@
-export type MemochatWebToNativeActions = 'test' | 'callback-test';
+//web to native message
+export type WebToNativeMessage = TestWebToNativeMessage;
 
-export type MemochatWebToNativeMessage = {
-  action: MemochatWebToNativeActions;
-  args?: string; // Record<string, unknown>;
-  callbackId?: string;
+export type WebToNativeAction = WebToNativeMessage['action'];
+
+export type TestWebToNativeMessage = {
+  action: 'test';
 };
 
-export type MemochatNativeToWebCallbackResponseMessage = {
-  action: MemochatWebToNativeActions;
+// web to native callback message
+export type WebToNativeCallbackMessage =
+  | CallbackTestWebToNativeCallbackMessage
+  | UploadImageWebToNativeCallbackMessage;
+export type WebToNativeCallbackAction = WebToNativeCallbackMessage['action'];
+
+export type CallbackTestWebToNativeCallbackMessage = {
+  action: 'callback-test';
+  args?: Record<string, unknown>;
+  callbackId: string;
+};
+
+export type UploadImageWebToNativeCallbackMessage = {
+  action: 'upload-image';
+  args: {
+    type: 'camera' | 'gallery';
+  };
+  callbackId: string;
+};
+
+// native to web callback response message
+export type NativeToWebCallbackMessage =
+  | CallbackTestNativeToWebCallbackMessage
+  | UploadImageNativeToWebCallbackMessage;
+export type NativeToWebCallbackAction = NativeToWebCallbackMessage['action'];
+
+export type CallbackTestNativeToWebCallbackMessage = {
+  action: 'callback-test';
   data?: Record<string, unknown>;
   error?: Record<string, unknown>;
   callbackId?: string;
 };
 
-export type MemochatNativeToWebActions = 'back';
-
-export type MemochatNativeToWebMessage = {
-  action: MemochatNativeToWebActions;
-  data?: Record<string, unknown>;
+export type UploadImageNativeToWebCallbackMessage = {
+  action: 'upload-image';
+  data?: {imageUrl: string};
+  error?: Record<string, unknown>;
   callbackId?: string;
 };
 
-export type MemochatWebToNativeRequestParams = {
-  action: MemochatWebToNativeActions;
-  args?: Record<string, unknown>;
+// native to web message
+export type NativeToWebMessage = BackNativeToWebMessage;
+export type NativeToWebAction = NativeToWebMessage['action'];
+
+type BackNativeToWebMessage = {
+  action: 'back';
 };
