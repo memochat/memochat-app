@@ -21,9 +21,8 @@ import Toast from 'react-native-toast-message';
 import {WebView, WebViewMessageEvent} from 'react-native-webview';
 
 import WebViewMessageSender from './modules/WebViewMessageSender';
-import WebViewMessageReceiver, {
-  MemochatWebViewMessage,
-} from './modules/WebViewMessageReceiver';
+import WebViewMessageReceiver from './modules/WebViewMessageReceiver';
+import {WebToNativeCallbackMessage, WebToNativeMessage} from './modules/types';
 
 const screen = Dimensions.get('screen');
 
@@ -54,9 +53,11 @@ const App = () => {
     };
   }, []);
 
-  const handleMessage = (event: WebViewMessageEvent) => {
+  const handleMessage = async (event: WebViewMessageEvent) => {
     const {nativeEvent} = event;
-    const message = JSON.parse(nativeEvent.data) as MemochatWebViewMessage;
+    const message = JSON.parse(nativeEvent.data) as
+      | WebToNativeMessage
+      | WebToNativeCallbackMessage;
 
     const webViewMessageReceiver = new WebViewMessageReceiver();
     const webViewMessageSender = new WebViewMessageSender(webViewRef.current);
@@ -69,11 +70,18 @@ const App = () => {
       case 'callback-test': {
         webViewMessageReceiver.callbackTest(message);
         setTimeout(() => {
-          webViewMessageSender.callbackTest({
-            action: message.action,
+          webViewMessageSender.callbackTestCallback({
             callbackId: message.callbackId,
           });
         }, 1000);
+        return;
+      }
+      case 'upload-image': {
+        const formData = await webViewMessageReceiver.uploadImage(message);
+        webViewMessageSender.uploadImageCallback({
+          formData,
+          callbackId: message.callbackId,
+        });
         return;
       }
       default: {
