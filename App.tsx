@@ -33,14 +33,11 @@ const screen = Dimensions.get("screen");
 /**
  * @todo .env 파일 추가
  * dev인 경우 localhost, production인 경우 호스팅된 url로 변경 */
-const BASE_WEBVIEW_URL = `http://${
-  Platform.OS === "android" ? "10.0.2.2" : "localhost"
-}:3000`;
-
-// const BASE_WEBVIEW_URL = "https://client.memochat.memo";
+const BASE_WEBVIEW_URL = "https://memochat-client.vercel.app"; // process.env.APP_URL || "http://localhost:3000";
 
 const App = () => {
   const webViewRef = useRef<WebView>(null);
+  console.log(process.env.APP_URL);
 
   useEffect(() => {
     const backAction = (): boolean => {
