@@ -9,16 +9,9 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import {
-  BackHandler,
-  Dimensions,
-  StatusBar,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { BackHandler, Dimensions, StyleSheet, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import { WebViewMessageEvent } from "react-native-webview";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
 import WebViewMessageSender from "./modules/WebViewMessageSender";
@@ -27,8 +20,7 @@ import {
   WebToNativeCallbackMessage,
   WebToNativeMessage,
 } from "./modules/types";
-
-const screen = Dimensions.get("screen");
+import { KeyboardAvoidingView } from "react-native";
 
 /**
  * @todo .env 파일 추가
@@ -97,22 +89,34 @@ const App = () => {
     }
   };
 
+  const webView = (
+    <WebView
+      ref={webViewRef}
+      source={{ uri: BASE_WEBVIEW_URL }}
+      originWhitelist={["*"]}
+      scrollEnabled={false}
+      cacheEnabled={false}
+      style={styles.webview}
+      onMessage={handleMessage}
+      injectedJavaScript={"console.log(window.MemochatWebview)"}
+    />
+  );
+
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <WebView
-          ref={webViewRef}
-          source={{ uri: BASE_WEBVIEW_URL }}
-          originWhitelist={["*"]}
-          cacheEnabled={false}
-          style={styles.webview}
-          onMessage={handleMessage}
-          injectedJavaScript={"console.log(window.MemochatWebview)"}
-        />
-      </SafeAreaView>
+    <>
+      {Platform.OS === "ios" ? (
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior="height"
+          enabled
+        >
+          {webView}
+        </KeyboardAvoidingView>
+      ) : (
+        webView
+      )}
       <Toast />
-    </SafeAreaProvider>
+    </>
   );
 };
 
