@@ -21,6 +21,7 @@ import {
   WebToNativeMessage,
 } from "./modules/types";
 import { KeyboardAvoidingView } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 /**
  * @todo .env 파일 추가
@@ -113,7 +114,9 @@ const App = () => {
           {webView}
         </KeyboardAvoidingView>
       ) : (
-        webView
+        <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
+          <SafeAreaView style={styles.container}>{webView}</SafeAreaView>
+        </SafeAreaProvider>
       )}
       <Toast />
     </>
