@@ -15,9 +15,10 @@ import {
   StatusBar,
   StyleSheet,
   Platform,
+  Linking,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import { WebViewMessageEvent } from "react-native-webview";
+import { WebViewMessageEvent, WebViewNavigation } from "react-native-webview";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import WebView from "react-native-webview";
 
@@ -27,6 +28,7 @@ import {
   WebToNativeCallbackMessage,
   WebToNativeMessage,
 } from "./modules/types";
+import { OnShouldStartLoadWithRequest } from "react-native-webview/lib/WebViewTypes";
 
 const screen = Dimensions.get("screen");
 
@@ -45,20 +47,23 @@ const App = () => {
   const webViewRef = useRef<WebView>(null);
   console.log(process.env.APP_URL);
 
-  useEffect(() => {
-    const backAction = (): boolean => {
-      const bridge = new WebViewMessageSender(webViewRef.current);
+  const onNavigationStateChange = (navState: WebViewNavigation) => {
+    if (!navState.url.includes(BASE_WEBVIEW_URL)) {
+      // 새 탭 열기
+      Linking.openURL(navState.url);
+      return false;
+    }
+  };
 
-      bridge.back();
-      return true;
-    };
-
-    BackHandler.addEventListener("hardwareBackPress", backAction);
-
-    return () => {
-      BackHandler.removeEventListener("hardwareBackPress", backAction);
-    };
-  }, []);
+  const onShouldStartLoadWithRequest: OnShouldStartLoadWithRequest = (
+    event
+  ) => {
+    if (!event.url.includes(BASE_WEBVIEW_URL)) {
+      Linking.openURL(event.url);
+      return false;
+    }
+    return true;
+  };
 
   const handleMessage = async (event: WebViewMessageEvent) => {
     const { nativeEvent } = event;
@@ -97,6 +102,21 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    const backAction = (): boolean => {
+      const bridge = new WebViewMessageSender(webViewRef.current);
+
+      bridge.back();
+      return true;
+    };
+
+    BackHandler.addEventListener("hardwareBackPress", backAction);
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", backAction);
+    };
+  }, []);
+
   return (
     <SafeAreaProvider style={{ backgroundColor: "#fff" }}>
       <SafeAreaView style={styles.container}>
@@ -109,6 +129,8 @@ const App = () => {
           style={styles.webview}
           onMessage={handleMessage}
           injectedJavaScript={"console.log(window.MemochatWebview)"}
+          onNavigationStateChange={onNavigationStateChange}
+          onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         />
       </SafeAreaView>
       <Toast />
