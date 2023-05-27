@@ -14,7 +14,7 @@ import Toast from "react-native-toast-message";
 
 import { KeyboardAvoidingView } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import MemochatWebView from "./src/components/MemochatWebView";
+import MemochatWebView from "@src/components/MemochatWebView";
 
 const App = () => {
   return (

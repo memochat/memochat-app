@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { BackHandler, Platform, StyleSheet } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
-import WebViewMessageSender from "../modules/WebViewMessageSender";
 import {
   WebToNativeCallbackMessage,
   WebToNativeMessage,
-} from "../modules/types";
-import WebViewMessageReceiver from "../modules/WebViewMessageReceiver";
+} from "@src/modules/types";
+import WebViewMessageReceiver from "@src/modules/WebViewMessageReceiver";
+import WebViewMessageSender from "@src/modules/WebViewMessageSender";
 
 /**
  * TODO: .env 파일 추가
