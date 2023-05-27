@@ -1,10 +1,10 @@
-import Toast from 'react-native-toast-message';
-import {openCamera, openGallery, parseFormData} from '../utils/imagePicker';
+import Toast from "react-native-toast-message";
+import { openCamera, openGallery, parseFormData } from "../utils/imagePicker";
 import {
   TestWebToNativeMessage,
   CallbackTestWebToNativeCallbackMessage,
   UploadImageWebToNativeCallbackMessage,
-} from './types';
+} from "./types";
 
 class WebViewMessageReceiver {
   static instance: WebViewMessageReceiver;
@@ -19,7 +19,7 @@ class WebViewMessageReceiver {
 
   test(message: TestWebToNativeMessage) {
     Toast.show({
-      type: 'info', //success, error, info
+      type: "info", //success, error, info
       text1: message.action,
       text2: JSON.stringify(message),
     });
@@ -28,18 +28,18 @@ class WebViewMessageReceiver {
 
   callbackTest(message: CallbackTestWebToNativeCallbackMessage) {
     Toast.show({
-      type: 'info', //success, error, info
+      type: "info", //success, error, info
       text1: message.action,
       text2: JSON.stringify(message),
     });
   }
 
   async uploadImage(
-    message: UploadImageWebToNativeCallbackMessage,
+    message: UploadImageWebToNativeCallbackMessage
   ): Promise<FormData | undefined> {
     try {
       switch (message.args.type) {
-        case 'camera': {
+        case "camera": {
           const asset = await openCamera();
           if (!asset) {
             return;
@@ -47,7 +47,7 @@ class WebViewMessageReceiver {
           const formData = parseFormData(asset);
           return formData;
         }
-        case 'gallery': {
+        case "gallery": {
           const asset = await openGallery();
           if (!asset) {
             return;

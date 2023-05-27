@@ -4,40 +4,38 @@
     "slug": "memochat-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./src/assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sooohka.memochat-app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.sooohka.memochatapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "07c2ac1e-214a-4b30-8bcd-4c34e04cd174"
+        "projectId": "ab91e5ac-ed41-4802-bfa2-89f0750ea4a3"
       }
     },
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/07c2ac1e-214a-4b30-8bcd-4c34e04cd174"
+      "url": "https://u.expo.dev/ab91e5ac-ed41-4802-bfa2-89f0750ea4a3"
     }
   }
 }
