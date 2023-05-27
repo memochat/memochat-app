@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BackHandler } from "react-native";
 import WebView from "react-native-webview";
 
-import WebViewMessageSender from "@src/modules/WebViewMessageSender";
+import WebViewMessageSender from "@src/webviewBridge/WebViewMessageSender";
 
 const useHardwareBackPressEvent = (webView: WebView | null) => {
   useEffect(() => {

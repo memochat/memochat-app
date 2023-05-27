@@ -1,5 +1,5 @@
-import WebView from 'react-native-webview';
-import {NativeToWebCallbackMessage, NativeToWebMessage} from './types';
+import WebView from "react-native-webview";
+import { NativeToWebCallbackMessage, NativeToWebMessage } from "./types";
 
 /**
  * webview로 메시지 보내는 브릿지
@@ -11,7 +11,7 @@ class WebViewMessageSender {
   constructor(webViewRef?: WebView | null) {
     if (!WebViewMessageSender.instance) {
       if (!webViewRef) {
-        throw new Error('WebView ref is not set');
+        throw new Error("WebView ref is not set");
       }
       WebViewMessageSender.webViewRef = webViewRef;
       WebViewMessageSender.instance = this;
@@ -23,8 +23,8 @@ class WebViewMessageSender {
   private postNativeToWebCallbackMessage(message: NativeToWebCallbackMessage) {
     WebViewMessageSender.webViewRef.injectJavaScript(
       `window.MemochatWebview.postNativeToWebCallbackMessage(${JSON.stringify(
-        message,
-      )})`,
+        message
+      )})`
     );
   }
 
@@ -36,20 +36,20 @@ class WebViewMessageSender {
     */
     WebViewMessageSender.webViewRef.injectJavaScript(
       `window.MemochatWebview.postNativeToWebMessage(${JSON.stringify(
-        message,
-      )})`,
+        message
+      )})`
     );
   }
 
   back() {
-    this.postNativeToWebMessage({action: 'back'});
+    this.postNativeToWebMessage({ action: "back" });
   }
 
-  callbackTestCallback({callbackId}: {callbackId: string}) {
+  callbackTestCallback({ callbackId }: { callbackId: string }) {
     this.postNativeToWebCallbackMessage({
-      action: 'callback-test',
+      action: "callback-test",
       data: {
-        message: 'hello',
+        message: "hello",
       },
       callbackId,
     });
@@ -62,12 +62,12 @@ class WebViewMessageSender {
     formData: FormData | undefined;
     callbackId: string;
   }) {
-    console.log('formData: ', formData);
+    console.log("formData: ", formData);
     if (!formData) {
       this.postNativeToWebCallbackMessage({
-        action: 'upload-image',
+        action: "upload-image",
         error: {
-          message: '이미지 호출 실패',
+          message: "이미지 호출 실패",
         },
         callbackId,
       });
@@ -76,9 +76,9 @@ class WebViewMessageSender {
 
     // TODO: 이미지 업로드 api 호출
     this.postNativeToWebCallbackMessage({
-      action: 'upload-image',
+      action: "upload-image",
       data: {
-        imageUrl: 'imageUrl',
+        imageUrl: "imageUrl",
       },
       callbackId,
     });

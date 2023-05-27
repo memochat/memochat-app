@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
-import { WebToNativeCallbackMessage } from "@src/modules/types";
-import { WebToNativeMessage } from "@src/modules/types";
-import WebViewMessageReceiver from "@src/modules/WebViewMessageReceiver";
-import WebViewMessageSender from "@src/modules/WebViewMessageSender";
+import { WebToNativeCallbackMessage } from "@src/webviewBridge/types";
+import { WebToNativeMessage } from "@src/webviewBridge/types";
+import WebViewMessageReceiver from "@src/webviewBridge/WebViewMessageReceiver";
+import WebViewMessageSender from "@src/webviewBridge/WebViewMessageSender";
 import { kebabToPascal } from "@src/utils/caseConverter";
 
 type WebViewMessage = WebToNativeMessage | WebToNativeCallbackMessage;
