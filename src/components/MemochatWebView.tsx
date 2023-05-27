@@ -1,19 +1,16 @@
-import { useEffect, useRef } from "react";
-import { BackHandler, Platform, StyleSheet } from "react-native";
-import WebView, { WebViewMessageEvent } from "react-native-webview";
-import {
-  WebToNativeCallbackMessage,
-  WebToNativeMessage,
-} from "@src/modules/types";
-import WebViewMessageReceiver from "@src/modules/WebViewMessageReceiver";
-import WebViewMessageSender from "@src/modules/WebViewMessageSender";
+import { useRef } from "react";
+import { Platform, StyleSheet } from "react-native";
+import WebView from "react-native-webview";
+
+import useHardwareBackPressEvent from "@src/hooks/useHardwareBackPressEvent";
+import useWebViewMessageHandler from "@src/hooks/useWebViewMessageHandler";
 
 /**
  * TODO: .env 파일 추가
  * dev인 경우 localhost, production인 경우 호스팅된 url로 변경 */
 const BASE_WEBVIEW_URL = `http://${
   Platform.OS === "android" ? "10.0.2.2" : "localhost"
-}:3000`;
+}:3000/test`;
 // const BASE_WEBVIEW_URL = "https://memochat-client.vercel.app"; // process.env.APP_URL || "http://localhost:3000";
 
 const MemochatWebView = () => {
@@ -21,57 +18,28 @@ const MemochatWebView = () => {
 
   const webViewRef = useRef<WebView>(null);
 
-  useEffect(() => {
-    const backAction = (): boolean => {
-      const bridge = new WebViewMessageSender(webViewRef.current);
+  useHardwareBackPressEvent(webViewRef.current);
 
-      bridge.back();
-      return true;
-    };
-
-    BackHandler.addEventListener("hardwareBackPress", backAction);
-
-    return () => {
-      BackHandler.removeEventListener("hardwareBackPress", backAction);
-    };
-  }, []);
-
-  const handleMessage = async (event: WebViewMessageEvent) => {
-    const { nativeEvent } = event;
-    const message = JSON.parse(nativeEvent.data) as
-      | WebToNativeMessage
-      | WebToNativeCallbackMessage;
-
-    const webViewMessageReceiver = new WebViewMessageReceiver();
-    const webViewMessageSender = new WebViewMessageSender(webViewRef.current);
-
-    switch (message.action) {
-      case "test": {
-        webViewMessageReceiver.test(message);
-        return;
-      }
-      case "callback-test": {
-        webViewMessageReceiver.callbackTest(message);
-        setTimeout(() => {
-          webViewMessageSender.callbackTestCallback({
-            callbackId: message.callbackId,
-          });
-        }, 1000);
-        return;
-      }
-      case "upload-image": {
-        const formData = await webViewMessageReceiver.uploadImage(message);
-        webViewMessageSender.uploadImageCallback({
-          formData,
+  const { onMessage } = useWebViewMessageHandler(webViewRef.current, {
+    onTest: (message, receiver) => {
+      receiver.test(message);
+    },
+    onCallbackTest: (message, receiver, sender) => {
+      receiver.callbackTest(message);
+      setTimeout(() => {
+        sender.callbackTestCallback({
           callbackId: message.callbackId,
         });
-        return;
-      }
-      default: {
-        console.log(message);
-      }
-    }
-  };
+      }, 1000);
+    },
+    onUploadImage: async (message, receiver, sender) => {
+      const formData = await receiver.uploadImage(message);
+      sender.uploadImageCallback({
+        formData,
+        callbackId: message.callbackId,
+      });
+    },
+  });
 
   return (
     <WebView
@@ -81,7 +49,7 @@ const MemochatWebView = () => {
       scrollEnabled={false}
       cacheEnabled={false}
       style={styles.webview}
-      onMessage={handleMessage}
+      onMessage={onMessage}
       injectedJavaScript={"console.log(window.MemochatWebview)"}
     />
   );
