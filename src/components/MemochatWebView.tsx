@@ -10,7 +10,7 @@ import useWebViewMessageHandler from "@src/hooks/useWebViewMessageHandler";
  * dev인 경우 localhost, production인 경우 호스팅된 url로 변경 */
 const BASE_WEBVIEW_URL = `http://${
   Platform.OS === "android" ? "10.0.2.2" : "localhost"
-}:3000/test`;
+}:3000`;
 // const BASE_WEBVIEW_URL = "https://memochat-client.vercel.app"; // process.env.APP_URL || "http://localhost:3000";
 
 const MemochatWebView = () => {
