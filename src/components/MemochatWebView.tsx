@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import { Platform, StyleSheet } from "react-native";
-import WebView from "react-native-webview";
+import { Platform, StyleSheet, Linking } from "react-native";
+import WebView, { WebViewNavigation } from "react-native-webview";
+import { OnShouldStartLoadWithRequest } from "react-native-webview/lib/WebViewTypes";
 
 import useHardwareBackPressEvent from "@src/hooks/useHardwareBackPressEvent";
 import useWebViewMessageHandler from "@src/hooks/useWebViewMessageHandler";
@@ -41,6 +42,15 @@ const MemochatWebView = () => {
     },
   });
 
+  const handleOpenExternalURL = (url: string) => {
+    if (!url.includes(BASE_WEBVIEW_URL)) {
+      // 새 탭 열기
+      Linking.openURL(url);
+      return false;
+    }
+    return true;
+  };
+
   return (
     <WebView
       ref={webViewRef}
@@ -51,6 +61,8 @@ const MemochatWebView = () => {
       style={styles.webview}
       onMessage={onMessage}
       injectedJavaScript={"console.log(window.MemochatWebview)"}
+      onNavigationStateChange={({ url }) => handleOpenExternalURL(url)}
+      onShouldStartLoadWithRequest={({ url }) => handleOpenExternalURL(url)}
     />
   );
 };
